@@ -1,48 +1,50 @@
-const { PhotoshopAPI } = require('@adobe/aio-lib-photoshop-api');
-const fs = require('fs');
-const express = require('express');
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+from flask import Flask, request, send_from_directory
+from werkzeug.utils import secure_filename
+import photoshop.api as ps
+import os
 
-const app = express();
+app = Flask(__name__, static_url_path='')
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
+@app.route('/write', methods=['POST'])
+def write():
+    # Request first name, last name and psd file from React
+    ## Example
+    #first_name = request.form['first_name']
+    #last_name = request.form['last_name']
+    #psd_file = request.files['psd_file']
+    #profile_image = request.files['profile_image']
 
-app.post('/write', upload.fields([{ name: 'psd_file' }, { name: 'profile_image' }]), async (req, res) => {
-    const firstName = req.body.first_name;
-    const lastName = req.body.last_name;
-    const psdFile = req.files.psd_file[0].path;
-    const profileImage = req.files.profile_image[0].path;
+    psd_file_path = os.path.abspath(secure_filename(psd_file.filename))
+    #profile_image_path = os.path.abspath(secure_filename(profile_image.filename))
 
-    const client = await sdk.init('<ims org id>', '<api key>', '<valid auth token>');
+    psd_file.save(psd_file_path)
+    #profile_image.save(profile_image_path)
 
-    // Load the PSD file
-    const document = await client.open(psdFile);
+    # Load the PSD file
+    doc = ps.Application().open(psd_file_path)
 
-    // Edit the text layers
-    const firstNameLayer = document.layers.find(layer => layer.name === 'first_name');
-    const lastNameLayer = document.layers.find(layer => layer.name === 'last_name');
-    firstNameLayer.text = firstName;
-    lastNameLayer.text = lastName;
+    # Edit the text layers called first_name and last_name (replace their text to the ones from the request.form)
+    for layer in doc.layers:
+        if layer.kind == ps.LayerKind.TextLayer:
+            if layer.name == 'first_name':
+                layer.textItem.contents = first_name
+            elif layer.name == 'last_name':
+                layer.textItem.contents = last_name
 
-    // Create a smart object with the profile image
-    const smartObject = await client.createSmartObject(profileImage);
-    smartObject.name = 'profile_image';
-    smartObject.applyLayerEffects({ dropShadow: true, innerShadow: true, outerGlow: true, innerGlow: true });
+    print("Input are: " + first_name + " " + last_name)
 
-    // Add the smart object to the document
-    document.layers.push(smartObject);
+    # Make it import the profile image into the PSD file
+    # Import the profile image as a new layer
 
-    // Save the document as a new PSD file
-    const newPsdFile = 'new_' + psdFile;
-    await client.saveAs(newPsdFile, document);
+    # Save the document as a new JPG file
+    new_jpg_file = 'new_' + os.path.splitext(psd_file.filename)[0] + '.jpg'
+    doc.saveAs(new_jpg_file, options=ps.JPEGSaveOptions(quality=12), asCopy=True)
 
-    res.send('File has been written with the name ' + newPsdFile);
-});
+    return 'File has been written with the name ' + new_jpg_file
 
-app.listen(3000, () => console.log('Server started on port 3000'));
+if __name__ == '__main__':
+    app.run(port=3000)
