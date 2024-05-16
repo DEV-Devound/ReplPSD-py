@@ -5,11 +5,13 @@ import TemplateItem from './components/TemplateItem';
 import SearchBar from './components/SearchBar';
 import InputField from './components/InputField';
 import ResultImage from './components/ResultImage';
+import FileUploadButton from './components/FileUploadButton'; // Import FileUploadButton
 
 export default function App() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    psdFile: null, // Add psdFile to formData state
   });
 
   const handleChange = (e) => {
@@ -17,6 +19,13 @@ export default function App() {
     setFormData(prevFormData => ({
       ...prevFormData,
       [name]: value,
+    }));
+  };
+
+  const handleFileSelect = (file) => { // Define handleFileSelect function
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      psdFile: file,
     }));
   };
 
@@ -32,7 +41,7 @@ export default function App() {
 
     fetch('http://localhost:3000/write', {
       method: 'POST',
-      body: data, // No necesitas especificar el Content-Type en este caso
+      body: data,
     })
     .then(response => response.json())
     .then(data => console.log(data))
@@ -60,6 +69,7 @@ export default function App() {
           <div style={{marginBottom: '1rem'}}>
             <InputField label="First name.." name="firstName" onChange={handleChange} />
             <InputField label="Last name.." name="lastName" onChange={handleChange} />
+            <FileUploadButton onFileSelect={handleFileSelect} /> {/* Use handleFileSelect */}
           </div>
           <button type="submit">Generate</button>
         </form>
@@ -69,16 +79,6 @@ export default function App() {
         <ResultImage description="PLACEHOLDER IMAGE" />
         <h6 style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>FRONT SIDE</h6>
         <ResultImage description="PLACEHOLDER IMAGE 2" />
-      </div>
-      <div style={{width: '20%', padding: '0 1rem'}}>
-        <form onSubmit={handleSubmit}>
-          <div style={{marginBottom: '1rem'}}>
-            <InputField label="First name.." name="firstName" onChange={handleChange} />
-            <InputField label="Last name.." name="lastName" onChange={handleChange} />
-            <FileUploadButton onFileSelect={handleFileSelect} />
-          </div>
-          <button type="submit">Generate</button>
-        </form>
       </div>
     </div>
   );
