@@ -16,32 +16,25 @@ def write():
     data = request.form  # Use request.form to get form data
     first_name = data['first_name']
     last_name = data['last_name']
-    psd_file = request.files['psd_file']
 
-    if psd_file:
-        psd_file_path = os.path.join('/', secure_filename(psd_file.filename))
-        psd_file.save(psd_file_path)
+    with Session("C:/Users/Admin/Desktop/Proyecto_nuevo.psd", action="open") as ps:
+        doc = ps.active_document
+        desc = ps.ActionDescriptor
+        
+        for layer in doc.layers:
+            if layer.kind == ps.LayerKind.TextLayer:
+                if layer.name == 'first_name':
+                    layer.textItem.contents = first_name
+                elif layer.name == 'last_name':
+                    layer.textItem.contents = last_name
 
-        with Session("Import PSD File Here", action="open") as ps:
-            doc = ps.active_document
-            desc = ps.ActionDescriptor
-            
-            for layer in doc.layers:
-                if layer.kind == ps.LayerKind.TextLayer:
-                    if layer.name == 'first_name':
-                        layer.textItem.contents = first_name
-                    elif layer.name == 'last_name':
-                        layer.textItem.contents = last_name
+        opts = ps.ExportOptionsSaveForWeb()
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+        new_file_path = os.path.join(script_directory, 'new_file.png')
+        active_document = ps.app.activeDocument
+        active_document.exportDocument(new_file_path, ps.ExportType.SaveForWeb, opts)
 
-            opts = ps.ExportOptionsSaveForWeb()
-            script_directory = os.path.dirname(os.path.abspath(__file__))
-            new_file_path = os.path.join(script_directory, 'new_file.png')
-            active_document = ps.app.activeDocument
-            active_document.exportDocument(new_file_path, ps.ExportType.SaveForWeb, opts)
-
-            return jsonify({'message': 'Datos recibidos correctamente'})
-
-    return jsonify({'message': 'No se recibió ningún archivo PSD'}), 400
+        return jsonify({'message': 'Datos recibidos correctamente'})
 
 if __name__ == '__main__':
     app.run(port=3002)
