@@ -5,13 +5,13 @@ import TemplateItem from './components/TemplateItem';
 import SearchBar from './components/SearchBar';
 import InputField from './components/InputField';
 import ResultImage from './components/ResultImage';
-import FileUploadButton from './components/FileUploadButton'; // Import FileUploadButton
+import FileUploadButton from './components/FileUploadButton'; // Importa el nuevo componente
 
 export default function App() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    psdFile: null, // Add psdFile to formData state
+    psdFile: null, // Nuevo estado para almacenar el archivo PSD
   });
 
   const handleChange = (e) => {
@@ -22,10 +22,10 @@ export default function App() {
     }));
   };
 
-  const handleFileSelect = (file) => { // Define handleFileSelect function
+  const handleFileSelect = (e) => {
     setFormData(prevFormData => ({
       ...prevFormData,
-      psdFile: file,
+      psdFile: e.target.files[0], // Actualiza el estado con el archivo seleccionado
     }));
   };
 
@@ -39,9 +39,9 @@ export default function App() {
       data.append('psd_file', formData.psdFile);
     }
 
-    fetch('http://localhost:3000/write', {
+    fetch('http://localhost:3002/write', {
       method: 'POST',
-      body: data,
+      body: data, // No necesitas especificar el Content-Type en este caso
     })
     .then(response => response.json())
     .then(data => console.log(data))
@@ -69,7 +69,7 @@ export default function App() {
           <div style={{marginBottom: '1rem'}}>
             <InputField label="First name.." name="firstName" onChange={handleChange} />
             <InputField label="Last name.." name="lastName" onChange={handleChange} />
-            <FileUploadButton onFileSelect={handleFileSelect} /> {/* Use handleFileSelect */}
+            <FileUploadButton onFileSelect={handleFileSelect} />
           </div>
           <button type="submit">Generate</button>
         </form>
