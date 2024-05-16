@@ -19,10 +19,10 @@ def write():
     psd_file = request.files['psd_file']
 
     if psd_file:
-        psd_file_path = os.path.join('path_to_save', secure_filename(psd_file.filename))
+        psd_file_path = os.path.join('/', secure_filename(psd_file.filename))
         psd_file.save(psd_file_path)
 
-        with Session(psd_file_path, action="open", auto_close=True) as ps:
+        with Session("Import PSD File Here", action="open") as ps:
             doc = ps.active_document
             desc = ps.ActionDescriptor
             
@@ -38,7 +38,6 @@ def write():
             new_file_path = os.path.join(script_directory, 'new_file.png')
             active_document = ps.app.activeDocument
             active_document.exportDocument(new_file_path, ps.ExportType.SaveForWeb, opts)
-            os.startfile(new_file_path)
 
             return jsonify({'message': 'Datos recibidos correctamente'})
 

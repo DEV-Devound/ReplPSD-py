@@ -29,28 +29,32 @@ export default function App() {
     }));
   };
 
-  const handleSubmit = async () => {
-  const formData = new FormData();
-  formData.append('first_name', firstName);
-  formData.append('last_name', lastName);
-  formData.append('psd_file', psdFile); // Assuming psdFile is a File object
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent the default form submission behavior
 
-  try {
-    const response = await fetch('http://localhost:3002/write', {
-      method: 'POST',
-      body: formData,
-    });
+    const { firstName, lastName, psdFile } = formData; // Destructure formData to get the values
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const formDataToSend = new FormData();
+    formDataToSend.append('first_name', firstName);
+    formDataToSend.append('last_name', lastName);
+    formDataToSend.append('psd_file', psdFile); // Assuming psdFile is a File object
+
+    try {
+      const response = await fetch('http://127.0.0.1:3002/write', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Success:', data);
+    } catch (error) {
+      console.error('Error:', error);
     }
-
-    const data = await response.json();
-    console.log('Success:', data);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
+  };
 
   return (
     <div className="app-container">
