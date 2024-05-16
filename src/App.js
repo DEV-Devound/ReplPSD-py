@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Logo from './components/Logo';
 import CategoryItem from './components/CategoryItem';
 import TemplateItem from './components/TemplateItem';
@@ -7,6 +7,38 @@ import InputField from './components/InputField';
 import ResultImage from './components/ResultImage';
 
 export default function App() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const data = new FormData();
+    data.append('first_name', formData.firstName);
+    data.append('last_name', formData.lastName);
+    if (formData.psdFile) {
+      data.append('psd_file', formData.psdFile);
+    }
+
+    fetch('http://localhost:3000/write', {
+      method: 'POST',
+      body: data, // No necesitas especificar el Content-Type en este caso
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  };
+
   return (
     <div className="app-container">
       <div style={{width: '10%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
@@ -24,17 +56,29 @@ export default function App() {
         </div>
       </div>
       <div style={{width: '20%', padding: '0 1rem'}}>
-        <div style={{marginBottom: '1rem'}}>
-          <InputField label="First name.." />
-          <InputField label="Last name.." />
-        </div>
-        <button>Generate</button>
+        <form onSubmit={handleSubmit}>
+          <div style={{marginBottom: '1rem'}}>
+            <InputField label="First name.." name="firstName" onChange={handleChange} />
+            <InputField label="Last name.." name="lastName" onChange={handleChange} />
+          </div>
+          <button type="submit">Generate</button>
+        </form>
       </div>
       <div style={{width: '45%', padding: '0 1rem'}}>
         <h2 style={{fontSize: '1.25rem', marginBottom: '1rem'}}>Texas Template 2021</h2>
         <ResultImage description="PLACEHOLDER IMAGE" />
         <h6 style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>FRONT SIDE</h6>
         <ResultImage description="PLACEHOLDER IMAGE 2" />
+      </div>
+      <div style={{width: '20%', padding: '0 1rem'}}>
+        <form onSubmit={handleSubmit}>
+          <div style={{marginBottom: '1rem'}}>
+            <InputField label="First name.." name="firstName" onChange={handleChange} />
+            <InputField label="Last name.." name="lastName" onChange={handleChange} />
+            <FileUploadButton onFileSelect={handleFileSelect} />
+          </div>
+          <button type="submit">Generate</button>
+        </form>
       </div>
     </div>
   );
