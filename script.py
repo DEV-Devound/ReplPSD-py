@@ -13,9 +13,7 @@ def index():
 
 @app.route('/write', methods=['POST'])
 def write():
-    data = request.get_json()  # Asegúrate de obtener el JSON de la solicitud
-    print(data)  # Imprimir el contenido del JSON en la terminal
-
+    data = request.form  # Use request.form to get form data
     first_name = data['first_name']
     last_name = data['last_name']
     psd_file = request.files['psd_file']

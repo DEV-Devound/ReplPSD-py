@@ -29,24 +29,28 @@ export default function App() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+  const formData = new FormData();
+  formData.append('first_name', firstName);
+  formData.append('last_name', lastName);
+  formData.append('psd_file', psdFile); // Assuming psdFile is a File object
 
-    const data = new FormData();
-    data.append('first_name', formData.firstName);
-    data.append('last_name', formData.lastName);
-    if (formData.psdFile) {
-      data.append('psd_file', formData.psdFile);
+  try {
+    const response = await fetch('http://localhost:3002/write', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    fetch('http://localhost:3002/write', {
-      method: 'POST',
-      body: data, // No necesitas especificar el Content-Type en este caso
-    })
-    .then(response => response.json())
-    .then(data => console.log(data))
-    .catch(error => console.error('Error:', error));
-  };
+    const data = await response.json();
+    console.log('Success:', data);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
 
   return (
     <div className="app-container">
